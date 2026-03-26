@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 class Vector
 {  
@@ -13,16 +14,26 @@ private:
     void recalculateVector();
 
 public:
+    // vector constructors
     Vector();
     Vector(std::vector<double> vect);
 
+    // vector member functions
     void addElement(double element);
     static double dotProduct(Vector& vectorA, Vector& vectorB);
     static Vector crossProduct(const Vector& vectorA, const Vector& vectorB);
 
+    // simple vector return functions
     std::vector<double> getVector() const;
     size_t getSize() const;
     Vector getDirection();
     double getMagnitude();
     void printVector() const;
 };
+
+// operator overloads
+std::ostream& operator<<(std::ostream& os, const Vector& vect);
+Vector operator+(const Vector& vectorA, const Vector& vectorB);
+Vector operator-(const Vector& vectorA, const Vector& vectorB);
+Vector operator*(float scalar, Vector vector);
+Vector operator*(Vector vector, int scalar);

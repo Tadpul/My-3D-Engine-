@@ -1,6 +1,5 @@
 #include "Vector.h"
 #include <cmath>
-#include <iostream>
 #include <cassert>
 
 void Vector::recalculateVector()
@@ -96,15 +95,6 @@ void Vector::printVector() const
         std::cout << element << ' ';
     }
     std::cout << '\n';
-}
-
-// operator overloads
-template <typename type>
-std::ostream& operator<<(std::ostream& os, const std::vector<type>& vect)
-{
-    for (type element : vect) { os << element << ' '; }
-    os << '\n';
-    return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector& vect)
