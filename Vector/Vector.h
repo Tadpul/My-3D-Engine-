@@ -29,6 +29,10 @@ public:
     Vector getDirection();
     double getMagnitude();
     void printVector() const;
+
+    // in function operator overloads
+    double& operator()(size_t element);
+    const double& operator()(size_t element) const;
 };
 
 // operator overloads

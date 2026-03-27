@@ -97,6 +97,17 @@ void Vector::printVector() const
     std::cout << '\n';
 }
 
+// in function operator overloads
+double& Vector::operator()(size_t element)
+{
+    return m_vector[element];
+}
+const double& Vector::operator()(size_t element) const
+{
+    return m_vector[element];
+}
+
+// operator overloads
 std::ostream& operator<<(std::ostream& os, const Vector& vect)
 {
     vect.printVector();
