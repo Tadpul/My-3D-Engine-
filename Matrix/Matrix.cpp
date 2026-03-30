@@ -135,9 +135,3 @@ Matrix<Rows1, Columns2> operator*(const Matrix<Rows1, Columns1>& m1, const Matri
 
 using Mat3 = Matrix<3, 3>;
 using Mat4 = Matrix<4, 4>;
-
-int main()
-{
-    Mat3 myMatrix{1, 2, 3, 4, 5, 6, 7, 8, 9};
-    std::cout << myMatrix;
-}
