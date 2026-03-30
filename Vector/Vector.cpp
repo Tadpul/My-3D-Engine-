@@ -2,6 +2,7 @@
 #include <array>
 #include <initializer_list>
 #include <cmath>
+#include <cassert>
 
 template <size_t Dimensions>
 class Vector
@@ -12,6 +13,11 @@ private:
 public:
     // constructors
     Vector() : m_vector({}) {}
+    Vector(std::initializer_list<double> vector) : m_vector({})
+    {
+        assert(vector.size() == Dimensions && "Number of elements must match!");
+        std::copy(vector.begin(), vector.end(), m_vector.begin());
+    }
     Vector(std::array<double, Dimensions> vector) : m_vector(std::move(vector)) {}
     
     // static functions
@@ -47,25 +53,25 @@ public:
     // accessor functions
     double& x()
     {
-        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4!");
         return m_vector[0];
     }
 
     double& y()
     {
-        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4!");
         return m_vector[1];
     }
 
     double& z()
     {
-        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4!");
         return m_vector[2];
     }   
 
     double& w()
     {
-        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4!");
         return m_vector[3];
     }
 
@@ -107,4 +113,6 @@ public:
     }
 };
 
+using Vec2 = Vector<2>;
 using Vec3 = Vector<3>;
+using Vec4 = Vector<4>;

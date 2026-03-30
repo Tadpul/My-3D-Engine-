@@ -127,4 +127,5 @@ Matrix<Rows1, Columns2> operator*(const Matrix<Rows1, Columns1>& m1, const Matri
     return result;
 }
 
+using Mat3 = Matrix<3, 3>;
 using Mat4 = Matrix<4, 4>;
