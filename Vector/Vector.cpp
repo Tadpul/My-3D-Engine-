@@ -1,154 +1,110 @@
-#include "Vector.h"
+#include <iostream>
+#include <array>
+#include <initializer_list>
 #include <cmath>
-#include <cassert>
 
-void Vector::recalculateVector()
+template <size_t Dimensions>
+class Vector
 {
-    // recalculate the magnitude of this new vector
-    double squaredSum{ 0 };
-    for (double num : m_vector) { squaredSum += std::pow(num, 2); }
-    m_magnitude = std::sqrt(squaredSum);
+private:
+    std::array<double, Dimensions> m_vector;
 
-    // recalculate the direction of this vector
-    m_direction.resize(m_vector.size(), 0.0);
-    if (m_magnitude)
+public:
+    // constructors
+    Vector() : m_vector({}) {}
+    Vector(std::array<double, Dimensions> vector) : m_vector(std::move(vector)) {}
+    
+    // static functions
+    static double dotProduct(const Vector<Dimensions>& v1, const Vector<Dimensions>& v2) 
     {
-        for (size_t i{ 0 }; i < m_vector.size(); i++)
-        {
-            m_direction[i] = m_vector[i] / m_magnitude;
-        }
+        double result{};
+        for (size_t i{ 0 }; i < Dimensions; i++) { result += v1.m_vector[i] * v2.m_vector[i]; }
+        return result;
     }
-}
 
-Vector::Vector() : m_vector({}), m_direction({}), m_magnitude(0), m_needsUpdate(false) {}
-Vector::Vector(std::vector<double> vect) : m_vector(std::move(vect)), m_needsUpdate(true) {}
-
-void Vector::addElement(double element)
-{
-    m_vector.push_back(element);
-    m_needsUpdate = true;
-}
-
-// static vector operation functions 
-double Vector::dotProduct(Vector& vectorA, Vector& vectorB)
-{
-    assert(vectorA.getSize() == vectorB.getSize() && "Vectors must have the same size!");
-
-    double dotProduct{ 0 };
-    for (size_t i( 0 ); i < vectorA.getSize(); i++)
+    // simple return functions
+    double getMagnitude() const 
     {
-        dotProduct += (vectorA.getVector()[i] * vectorB.getVector()[i]);
+        double squaredSum{ 0 };
+        for (double num : m_vector) { squaredSum += std::pow(num, 2); }
+        return std::sqrt(squaredSum);
     }
 
-    return dotProduct;
-}
-
-Vector Vector::crossProduct(const Vector& vectorA, const Vector& vectorB)
-{
-    assert(vectorA.getSize() == vectorB.getSize() && (vectorA.getSize() == 2 || vectorA.getSize() == 3) && "Vectors must have the same size!");
-
-    std::vector<double> vector1 = vectorA.getVector();
-    std::vector<double> vector2 = vectorB.getVector();
-
-    if (vectorA.getSize() == 2)
+    Vector<Dimensions> getDirection() const 
     {
-        vector1.push_back(0);
-        vector2.push_back(0);
+        double magnitude{ getMagnitude() };
+        std::array<double, Dimensions> direction{};
+        for (size_t i{ 0 }; i < Dimensions; i++) { direction[i] = m_vector[i] / magnitude; }
+        return Vector<Dimensions>(direction);
     }
 
-    std::vector<double> crossProduct(3, 0.0);
-    crossProduct[0] = vector1[1] * vector2[2] - vector1[2] * vector2[1];
-    crossProduct[1] = vector1[2] * vector2[0] - vector1[0] * vector2[2];
-    crossProduct[2] = vector1[0] * vector2[1] - vector1[1] * vector2[0];
-
-    if (vectorA.getSize() == 2) crossProduct.resize(2);
-    return Vector(crossProduct);
-}
-
-// simple return functions
-std::vector<double> Vector::getVector() const { return m_vector; }
-size_t Vector::getSize() const { return m_vector.size(); }
-Vector Vector::getDirection()
-{
-    if (m_needsUpdate)
-    { 
-        recalculateVector();
-        m_needsUpdate = false;
-    }
-    return m_direction;
-}
-
-double Vector::getMagnitude() 
-{
-    if (m_needsUpdate)
-    { 
-        recalculateVector();
-        m_needsUpdate = false;
-    }
-    return m_magnitude;
-}
-
-void Vector::printVector() const
-{
-    for (double element : m_vector)
+    void printVector() const
     {
-        std::cout << element << ' ';
+        for (double element : m_vector) { std::cout << element << ' '; }
+        std::cout << '\n';
     }
-    std::cout << '\n';
-}
 
-// in function operator overloads
-double& Vector::operator()(size_t element)
-{
-    return m_vector[element];
-}
-const double& Vector::operator()(size_t element) const
-{
-    return m_vector[element];
-}
-
-// operator overloads
-std::ostream& operator<<(std::ostream& os, const Vector& vect)
-{
-    vect.printVector();
-    return os;
-}
-
-Vector operator+(const Vector& vectorA, const Vector& vectorB)
-{
-    assert(vectorA.getSize() == vectorB.getSize() && "Vectors must be the same size!");
-
-    std::vector<double> resultVector(vectorA.getSize());
-    for (size_t i{ 0 }; i < vectorA.getSize(); i++)
+    // accessor functions
+    double& x()
     {
-        resultVector[i] = vectorA.getVector()[i] + vectorB.getVector()[i];
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        return m_vector[0];
     }
-    return Vector(resultVector);
-}
 
-Vector operator-(const Vector& vectorA, const Vector& vectorB)
-{
-    assert(vectorA.getSize() == vectorB.getSize() && "Vectors must be the same size!");
-
-    std::vector<double> resultVector(vectorA.getSize());
-    for (size_t i{ 0 }; i < vectorA.getSize(); i++)
+    double& y()
     {
-        resultVector[i] = vectorA.getVector()[i] - vectorB.getVector()[i];
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        return m_vector[1];
     }
-    return Vector(resultVector);
-}
 
-Vector operator*(float scalar, Vector vector)
-{
-    std::vector<double> resultVector(vector.getSize());
-    for (size_t i{ 0 }; i < vector.getSize(); i++)
+    double& z()
     {
-        resultVector[i] = scalar * vector.getVector()[i];
-    }
-    return Vector(resultVector);
-}
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        return m_vector[2];
+    }   
 
-Vector operator*(Vector vector, int scalar)
-{
-    return scalar * vector;
-}
+    double& w()
+    {
+        static_assert(Dimensions >= 1 && Dimensions < 5, "Dimensions must be from 1 - 4");
+        return m_vector[3];
+    }
+
+    // overload access function
+    double& operator()(size_t i) { return m_vector[i]; }
+
+    // general operator overloads
+    friend Vector<Dimensions> operator+(const Vector<Dimensions>& vectorA, const Vector<Dimensions>& vectorB)
+    {
+        std::array<double, Dimensions> result{};
+        for (size_t i{ 0 }; i < Dimensions; i++) { result[i] = vectorA.m_vector[i] + vectorB.m_vector[i]; }
+        return Vector(result);
+    }
+
+    friend Vector<Dimensions> operator-(const Vector<Dimensions>& vectorA, const Vector<Dimensions>& vectorB)
+    {
+        std::array<double, Dimensions> result{};
+        for (size_t i{ 0 }; i < Dimensions; i++) { result[i] = vectorA.m_vector[i] - vectorB.m_vector[i]; }
+        return Vector(result);
+    }
+
+    friend Vector<Dimensions> operator*(const double& scalar, const Vector<Dimensions>& vector)
+    {
+        std::array<double, Dimensions> result{};
+        for (size_t i{ 0 }; i < Dimensions; i++) { result[i] = scalar * vector.m_vector[i]; }
+        return Vector(result);
+    }
+
+    friend Vector<Dimensions> operator*(const Vector<Dimensions>& vector, const double& scalar)
+    {
+        return (scalar * vector);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, Vector<Dimensions> vector)
+    {
+        for (double element : vector.m_vector) { os << element << ' '; }
+        std::cout << '\n';
+        return os;
+    }
+};
+
+using Vec3 = Vector<3>;
