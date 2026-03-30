@@ -8,12 +8,12 @@ template <size_t Dimensions>
 class Vector
 {
 private:
-    std::array<double, Dimensions> m_vector;
+    std::array<double, Dimensions> m_vector{};
 
 public:
     // constructors
-    Vector() : m_vector({}) {}
-    Vector(std::initializer_list<double> vector) : m_vector({})
+    Vector() {}
+    Vector(std::initializer_list<double> vector) 
     {
         assert(vector.size() == Dimensions && "Number of elements must match!");
         std::copy(vector.begin(), vector.end(), m_vector.begin());

@@ -2,15 +2,21 @@
 #include <cmath>
 #include <cassert>
 #include <array>
+#include <initializer_list>
 
 template <size_t Rows, size_t Columns>
 class Matrix
 {
 private:
-    std::array<double, Rows * Columns> m_matrix;
+    std::array<double, Rows * Columns> m_matrix{};
 
 public:
-    Matrix() : m_matrix({}) {}
+    Matrix() {}
+    Matrix(std::initializer_list<double> matrix) 
+    {
+        assert(matrix.size() == (Rows * Columns) && "Number of elements must match!");
+        std::copy(matrix.begin(), matrix.end(), m_matrix.begin());
+    }
     Matrix(std::array<double, Rows * Columns> mat) : m_matrix(std::move(mat)) {}
 
     void printMatrix() const 
@@ -129,3 +135,9 @@ Matrix<Rows1, Columns2> operator*(const Matrix<Rows1, Columns1>& m1, const Matri
 
 using Mat3 = Matrix<3, 3>;
 using Mat4 = Matrix<4, 4>;
+
+int main()
+{
+    Mat3 myMatrix{1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::cout << myMatrix;
+}
