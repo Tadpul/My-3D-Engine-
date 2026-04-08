@@ -1,62 +1,79 @@
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <string>
 #include "Matrix.h"
 #include "Vector.h"
 
-Vec2 ortho(const float& x, const float& y, const float& xScreenSize, const float& yScreenSize)
+struct SDLApplication
 {
-    Vec2 result{};
-    float scale = std::min(xScreenSize, yScreenSize);
-    result.x() = (x - 0.5 * xScreenSize) / (0.5 * scale);
-    result.y() = -(y - 0.5 * yScreenSize) / (0.5 * scale);
+    SDL_Window* m_window{};
+    bool running{};
 
-    return result;
-}
-
-Vec2 NDCToScreen(const Vec4& ndc, const float& xScreenSize, const float& yScreenSize)
-{
-    Vec2 result{};
-    float xScale = (xScreenSize > yScreenSize ? xScreenSize / yScreenSize : 1);
-    float yScale = (xScreenSize < yScreenSize ? yScreenSize / xScreenSize : 1);
-
-    result.x() = (ndc.x() + xScale) / (2 * xScale) * xScreenSize;
-    result.y() = (-ndc.y() + yScale) / (2 * yScale) * yScreenSize;
-
-    return result;
-}
-
-int main()
-{
-    if (!SDL_Init(SDL_INIT_VIDEO)) return SDL_APP_FAILURE;
-    
-    constexpr float xScreenSize{ 2000 };
-    constexpr float yScreenSize{ 1000 };
-    Vec2 orthoPosition{0, 0};
-    Vec2 screenPosition{0, 0};
-    Vec4 ndc{0, 0, 1, 1};
-
-    SDL_Window* window = SDL_CreateWindow("new window", xScreenSize, yScreenSize, 0);
-    SDL_Event event;
-
-    const bool* keys = SDL_GetKeyboardState(nullptr);
-
-    bool running{ true };
-    while (running)
+    SDLApplication(const char* windowName, const float& width, const float& length) 
     {
+        m_window = SDL_CreateWindow(windowName, width, length, 0);
+        running = true;
+    }
+
+    ~SDLApplication()
+    {
+        SDL_Quit();
+    }
+
+    void Input() 
+    {
+        SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT) running = false;
             else if (event.type == SDL_EVENT_MOUSE_MOTION)
             {
-                
-                orthoPosition = ortho(event.motion.x, event.motion.y, xScreenSize, yScreenSize);
-                ndc.x() = orthoPosition.x(); ndc.y() = orthoPosition.y();
-                std::cout << orthoPosition;
-                std::cout << NDCToScreen(ndc, xScreenSize, yScreenSize);
+                SDL_Log("%d", event.motion.timestamp);
             }
         }
     }
 
-    SDL_Quit();
+    void Update() {}
+
+    void Render() {}
+
+    void MainLoop()
+    {
+        int fps{};
+        Uint64 lastTime{};
+
+        int targetFps{ 60 };
+        Uint64 frameDelay{ 1000 / targetFps };
+
+        while (running)
+        {
+            // start timer at start of frame and call update function
+            Uint64 currentTime{ SDL_GetTicks() };
+            Input();
+            Update();
+            Render();
+
+            // record time taken for update to occur in delta time variable, incrament fps
+            Uint64 deltaTime{ SDL_GetTicks() - currentTime };
+
+            // calculate fps
+            fps++;
+            if (SDL_GetTicks() > 1000 + lastTime) 
+            {
+                std::string title{ "my window FPS: " + std::to_string(fps) };
+                SDL_SetWindowTitle(m_window, title.c_str());
+
+                fps = 0;
+                lastTime = SDL_GetTicks();
+            }
+            else if (frameDelay > deltaTime) SDL_Delay(currentTime + 16.67 - SDL_GetTicks());
+        }
+    }
+};
+
+int main()
+{
+    SDLApplication app("myWindow", 700.0f, 600.0f);
+    app.MainLoop();
     return 0;
 }
