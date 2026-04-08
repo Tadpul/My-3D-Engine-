@@ -16,11 +16,8 @@ Vec2 ortho(const float& x, const float& y, const float& xScreenSize, const float
 Vec2 NDCToScreen(const Vec4& ndc, const float& xScreenSize, const float& yScreenSize)
 {
     Vec2 result{};
-    float xScale = (xScreenSize > yScreenSize ? xScreenSize / yScreenSize : 1);
-    float yScale = (xScreenSize < yScreenSize ? yScreenSize / xScreenSize : 1);
-
-    result.x() = (ndc.x() + xScale) / (2 * xScale) * xScreenSize;
-    result.y() = (-ndc.y() + yScale) / (2 * yScale) * yScreenSize;
+    result.x() = (xScreenSize > yScreenSize ? 0.5 * (yScreenSize * ndc.x() + xScreenSize) : 0.5 * (ndc.x() + 1) * xScreenSize);
+    result.y() = (xScreenSize < yScreenSize ? result.x() = 0.5 * (ndc.x() + 1) * xScreenSize : result.y() = 0.5 * (-ndc.y() + 1) * yScreenSize);
 
     return result;
 }
@@ -29,8 +26,8 @@ int main()
 {
     if (!SDL_Init(SDL_INIT_VIDEO)) return SDL_APP_FAILURE;
     
-    constexpr float xScreenSize{ 2000 };
-    constexpr float yScreenSize{ 1000 };
+    constexpr float xScreenSize{ 600 };
+    constexpr float yScreenSize{ 600 };
     Vec2 orthoPosition{0, 0};
     Vec2 screenPosition{0, 0};
     Vec4 ndc{0, 0, 1, 1};
