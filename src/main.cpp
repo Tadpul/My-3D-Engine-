@@ -1,17 +1,27 @@
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <string>
+#include <cassert>
+#include <filesystem>
 #include "Matrix.h"
 #include "Vector.h"
 
 struct SDLApplication
 {
     SDL_Window* m_window{};
+    SDL_Surface* m_surface{};
+    SDL_Surface* m_windowSurface{};
     bool running{};
 
     SDLApplication(const char* windowName, const float& width, const float& length) 
     {
+        if (!SDL_Init(SDL_INIT_VIDEO)) std::cout << "Error: " << SDL_GetError() << std::endl;
+
         m_window = SDL_CreateWindow(windowName, width, length, 0);
+        m_surface = SDL_LoadBMP("assets/FishInTank.bmp");
+        if (!m_surface) std::cout << "Error: " << SDL_GetError() << std::endl;
+        m_windowSurface = SDL_GetWindowSurface(m_window);
+
         running = true;
     }
 
@@ -26,24 +36,32 @@ struct SDLApplication
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT) running = false;
-            else if (event.type == SDL_EVENT_MOUSE_MOTION)
+            else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             {
-                SDL_Log("%d", event.motion.timestamp);
+                SDL_Log("%d", event.button.button);
+            }
+            else if (event.type == SDL_EVENT_KEY_DOWN)
+            {
+                SDL_Log("buttoncode pressed: %d", event.key.key);
             }
         }
     }
 
     void Update() {}
 
-    void Render() {}
+    void Render() 
+    {
+        SDL_BlitSurface(m_surface, nullptr, m_windowSurface, nullptr);
+        SDL_UpdateWindowSurface(m_window);
+    }
 
     void MainLoop()
     {
         int fps{};
         Uint64 lastTime{};
 
-        int targetFps{ 60 };
-        Uint64 frameDelay{ 1000 / targetFps };
+        constexpr int targetFps{ 120 };
+        Uint64 frameDelay{ static_cast<Uint64>(1000 / targetFps) };
 
         while (running)
         {
@@ -60,19 +78,21 @@ struct SDLApplication
             fps++;
             if (SDL_GetTicks() > 1000 + lastTime) 
             {
+                lastTime = SDL_GetTicks();
                 std::string title{ "my window FPS: " + std::to_string(fps) };
                 SDL_SetWindowTitle(m_window, title.c_str());
 
                 fps = 0;
-                lastTime = SDL_GetTicks();
             }
-            else if (frameDelay > deltaTime) SDL_Delay(currentTime + 16.67 - SDL_GetTicks());
+            // if frame is less than wanted frame delay, delay the app to match target fps
+            else if (frameDelay > deltaTime) SDL_Delay(currentTime + frameDelay - SDL_GetTicks());
         }
     }
 };
 
 int main()
 {
+    std::cout << "Working dir: " << std::filesystem::current_path() << std::endl;
     SDLApplication app("myWindow", 700.0f, 600.0f);
     app.MainLoop();
     return 0;
