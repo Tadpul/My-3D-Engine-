@@ -2,26 +2,38 @@
 #include <iostream>
 #include <string>
 #include <cassert>
-#include "Matrix.h"
-#include "Vector.h"
+#include <algorithm>
+#include "math/Matrix.h"
+#include "math/Vector.h"
+#include "graphics/Renderer.h"
 
 struct SDLApplication
 {
     SDL_Window* m_window{};
     SDL_Renderer* m_renderer{};
+    Mesh m_objCube;
     bool running{};
+    int m_width, m_height;
 
-    float r, g, b;
-    SDLApplication(const char* windowName, const float& width, const float& length) 
+    float mousePositionX, mousePositionY;
+    SDLApplication(const char* windowName, const float& width, const float& height) 
     {
         if (!SDL_Init(SDL_INIT_VIDEO)) std::cout << "Error: " << SDL_GetError() << std::endl;
 
         // initialise member variables and test if they initialise propperly
-        m_window = SDL_CreateWindow(windowName, width, length, 0);
+        m_window = SDL_CreateWindow(windowName, width, height, 0);
         m_renderer = SDL_CreateRenderer(m_window, nullptr);
         if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
 
+        // load cube mesh
+        m_objCube = OBJLoader::Load("untitled.obj");
+
+        // set background colour
+        SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 1);
+        SDL_RenderClear(m_renderer);
+
         running = true;
+        m_width = width; m_height = height;
     }
 
     ~SDLApplication()
@@ -37,8 +49,8 @@ struct SDLApplication
             if (event.type == SDL_EVENT_QUIT) running = false;
             else if (event.type == SDL_EVENT_MOUSE_MOTION)
             {
-                r = static_cast<float>(static_cast<int>(event.motion.x) % 225);
-                g = static_cast<float>(static_cast<int>(event.motion.y) % 225);
+                mousePositionX = event.motion.x;
+                mousePositionY = event.motion.y;
             }
         }
     }
@@ -47,8 +59,9 @@ struct SDLApplication
 
     void Render() 
     {
-        SDL_SetRenderDrawColor(m_renderer, r, g, 1, 1);
-        SDL_RenderClear(m_renderer);
+        SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+        Mat4 transform{ Mat4::projection(-20, 20, 20, 20, 0.5, 5) * Mat4::scale(std::min(m_width, m_height)) };
+        Renderer::DrawMesh(m_objCube, transform, m_renderer);
         
         // more drawing operations
         SDL_RenderPresent(m_renderer);
