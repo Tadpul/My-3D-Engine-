@@ -2,25 +2,24 @@
 #include <iostream>
 #include <string>
 #include <cassert>
-#include <filesystem>
 #include "Matrix.h"
 #include "Vector.h"
 
 struct SDLApplication
 {
     SDL_Window* m_window{};
-    SDL_Surface* m_surface{};
-    SDL_Surface* m_windowSurface{};
+    SDL_Renderer* m_renderer{};
     bool running{};
 
+    float r, g, b;
     SDLApplication(const char* windowName, const float& width, const float& length) 
     {
         if (!SDL_Init(SDL_INIT_VIDEO)) std::cout << "Error: " << SDL_GetError() << std::endl;
 
+        // initialise member variables and test if they initialise propperly
         m_window = SDL_CreateWindow(windowName, width, length, 0);
-        m_surface = SDL_LoadBMP("assets/FishInTank.bmp");
-        if (!m_surface) std::cout << "Error: " << SDL_GetError() << std::endl;
-        m_windowSurface = SDL_GetWindowSurface(m_window);
+        m_renderer = SDL_CreateRenderer(m_window, nullptr);
+        if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
 
         running = true;
     }
@@ -36,13 +35,10 @@ struct SDLApplication
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT) running = false;
-            else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+            else if (event.type == SDL_EVENT_MOUSE_MOTION)
             {
-                SDL_Log("%d", event.button.button);
-            }
-            else if (event.type == SDL_EVENT_KEY_DOWN)
-            {
-                SDL_Log("buttoncode pressed: %d", event.key.key);
+                r = static_cast<float>(static_cast<int>(event.motion.x) % 225);
+                g = static_cast<float>(static_cast<int>(event.motion.y) % 225);
             }
         }
     }
@@ -51,8 +47,11 @@ struct SDLApplication
 
     void Render() 
     {
-        SDL_BlitSurface(m_surface, nullptr, m_windowSurface, nullptr);
-        SDL_UpdateWindowSurface(m_window);
+        SDL_SetRenderDrawColor(m_renderer, r, g, 1, 1);
+        SDL_RenderClear(m_renderer);
+        
+        // more drawing operations
+        SDL_RenderPresent(m_renderer);
     }
 
     void MainLoop()
@@ -92,7 +91,6 @@ struct SDLApplication
 
 int main()
 {
-    std::cout << "Working dir: " << std::filesystem::current_path() << std::endl;
     SDLApplication app("myWindow", 700.0f, 600.0f);
     app.MainLoop();
     return 0;
