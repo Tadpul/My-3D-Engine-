@@ -95,6 +95,16 @@ public:
         return projectionMatrix;
     }
 
+    static Matrix<4, 4> translate(float x, float y, float z)
+    {
+        Matrix<4, 4> translationMatrix{ identity() };
+        translationMatrix(0, 3) = x;
+        translationMatrix(1, 3) = y;
+        translationMatrix(2, 3) = z;
+
+        return translationMatrix;
+    }
+
     // in class operator overloads
     float& operator()(size_t row, size_t column)
     {
@@ -162,9 +172,7 @@ Matrix<Rows1, Columns2> operator*(const Matrix<Rows1, Columns1>& m1, const Matri
     {
         for (size_t column{ 0 }; column < Columns2; column++)
         {
-            float elementSum{ 0 };
-            for (size_t i{ 0 }; i < Columns1; i++) { elementSum += m1(row, i) * m2(i, column); }
-            result(row, column) = elementSum;
+            for (size_t i{ 0 }; i < Columns1; i++) { result(row, column) += m1(row, i) * m2(i, column); }
         }
     }
     return result;

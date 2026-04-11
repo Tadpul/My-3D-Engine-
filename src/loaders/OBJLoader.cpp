@@ -30,9 +30,14 @@ Mesh OBJLoader::Load(const std::string& path)
         }
         else if (type == "f")
         {
-            int v0, v1, v2;
-            ss >> v0 >> v1 >> v2;
-            mesh.faces.push_back(Face{v0 - 1, v1 - 1, v2 - 1});
+            std::vector<int> vertexIndices{};
+            std::string token;
+            while (ss >> token) { vertexIndices.push_back(std::stoi(token.substr(0, token.find('/'))) - 1); }
+
+            for(size_t i{ 1 }; i + 1 < vertexIndices.size(); i++)
+            {
+                mesh.faces.push_back({vertexIndices[0], vertexIndices[i], vertexIndices[i + 1]});
+            }
         }
     }
     return mesh;

@@ -7,5 +7,6 @@
 class Renderer
 {
 public:
-    static void DrawMesh(Mesh mesh, const Mat4& transform, SDL_Renderer* sdl_renderer);
+    static Vec2 NDCToScreen(const Vec4& ndc, int width, int height);
+    static void DrawMesh(Mesh& mesh, const Mat4& transform, SDL_Renderer* sdl_renderer, int width, int height);
 };

@@ -14,11 +14,13 @@ struct SDLApplication
     Mesh m_objCube;
     bool running{};
     int m_width, m_height;
+    float m_angle{};
 
     float mousePositionX, mousePositionY;
-    SDLApplication(const char* windowName, const float& width, const float& height) 
+    SDLApplication(const char* windowName, const int width, const int height) 
     {
         if (!SDL_Init(SDL_INIT_VIDEO)) std::cout << "Error: " << SDL_GetError() << std::endl;
+        m_width = width; m_height = height;
 
         // initialise member variables and test if they initialise propperly
         m_window = SDL_CreateWindow(windowName, width, height, 0);
@@ -26,14 +28,9 @@ struct SDLApplication
         if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
 
         // load cube mesh
-        m_objCube = OBJLoader::Load("untitled.obj");
-
-        // set background colour
-        SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 1);
-        SDL_RenderClear(m_renderer);
+        m_objCube = OBJLoader::Load("monkey.obj");
 
         running = true;
-        m_width = width; m_height = height;
     }
 
     ~SDLApplication()
@@ -49,8 +46,7 @@ struct SDLApplication
             if (event.type == SDL_EVENT_QUIT) running = false;
             else if (event.type == SDL_EVENT_MOUSE_MOTION)
             {
-                mousePositionX = event.motion.x;
-                mousePositionY = event.motion.y;
+                m_angle += event.motion.xrel * (std::acos(0) / 180.0f);
             }
         }
     }
@@ -59,9 +55,18 @@ struct SDLApplication
 
     void Render() 
     {
+        // set background colour
+        SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+        SDL_RenderClear(m_renderer);
+
+        // render cube wireframe
         SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
-        Mat4 transform{ Mat4::projection(-20, 20, 20, 20, 0.5, 5) * Mat4::scale(std::min(m_width, m_height)) };
-        Renderer::DrawMesh(m_objCube, transform, m_renderer);
+
+        Mat4 rotation{ Mat4::rotateY(m_angle) };
+        Mat4 translation{ Mat4::translate(0, 0, 5.0f) };
+        Mat4 projection{ Mat4::projection(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 100.0f) };
+        Mat4 transform = projection * translation * rotation;
+        Renderer::DrawMesh(m_objCube, transform, m_renderer, m_width, m_height);
         
         // more drawing operations
         SDL_RenderPresent(m_renderer);
@@ -104,7 +109,7 @@ struct SDLApplication
 
 int main()
 {
-    SDLApplication app("myWindow", 700.0f, 600.0f);
+    SDLApplication app("myWindow", 700, 600);
     app.MainLoop();
     return 0;
 }

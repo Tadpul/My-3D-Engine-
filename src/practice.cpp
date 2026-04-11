@@ -13,15 +13,6 @@
 //     return result;
 // }
 
-// Vec2 NDCToScreen(const Vec4& ndc, const float& xScreenSize, const float& yScreenSize)
-// {
-//     Vec2 result{};
-//     result.x() = (xScreenSize > yScreenSize ? 0.5 * (yScreenSize * ndc.x() + xScreenSize) : 0.5 * (ndc.x() + 1) * xScreenSize);
-//     result.y() = (xScreenSize < yScreenSize ? result.x() = 0.5 * (ndc.x() + 1) * xScreenSize : result.y() = 0.5 * (-ndc.y() + 1) * yScreenSize);
-
-//     return result;
-// }
-
 // int main()
 // {
 //     if (!SDL_Init(SDL_INIT_VIDEO)) return SDL_APP_FAILURE;
