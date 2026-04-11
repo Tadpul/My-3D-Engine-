@@ -14,6 +14,8 @@ void Renderer::DrawMesh(Mesh& mesh, const Mat4& transform, SDL_Renderer* sdl_ren
 {
     std::vector<Vec4> ndcVertices{}; 
     std::vector<Vec2> sdlVertices{};
+    ndcVertices.reserve(mesh.vertices.size());
+    sdlVertices.reserve(mesh.vertices.size());
     for (const Vec4& vertex : mesh.vertices)
     {
         // transforms world mesh coordinates into NDC homogenus coordinates

@@ -14,7 +14,7 @@ struct SDLApplication
     Mesh m_objCube;
     bool running{};
     int m_width, m_height;
-    float m_angle{};
+    float m_angleY, m_angleX;
 
     float mousePositionX, mousePositionY;
     SDLApplication(const char* windowName, const int width, const int height) 
@@ -46,7 +46,8 @@ struct SDLApplication
             if (event.type == SDL_EVENT_QUIT) running = false;
             else if (event.type == SDL_EVENT_MOUSE_MOTION)
             {
-                m_angle += event.motion.xrel * (std::acos(0) / 180.0f);
+                m_angleY += event.motion.xrel * (std::acos(0) / 180.0f);
+                m_angleX += event.motion.yrel * (std::acos(0) / 180.0f);
             }
         }
     }
@@ -62,10 +63,11 @@ struct SDLApplication
         // render cube wireframe
         SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 
-        Mat4 rotation{ Mat4::rotateY(m_angle) };
+        Mat4 rotationY{ Mat4::rotateY(m_angleY) };
+        Mat4 rotationX{ Mat4::rotateX(m_angleX) };
         Mat4 translation{ Mat4::translate(0, 0, 5.0f) };
         Mat4 projection{ Mat4::projection(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 100.0f) };
-        Mat4 transform = projection * translation * rotation;
+        Mat4 transform = projection * translation * rotationX * rotationY;
         Renderer::DrawMesh(m_objCube, transform, m_renderer, m_width, m_height);
         
         // more drawing operations
