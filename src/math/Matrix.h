@@ -49,7 +49,12 @@ public:
         return Matrix(identityMatrix);
     }
 
-    static Matrix scale(float scalar) { return (scalar * identity()); }
+    static Matrix<4, 4> scale(float scalar) 
+    {
+        Matrix<4, 4> result{ identity() * scalar };
+        result(3, 3) = 1;
+        return result;
+    }
 
     static Matrix<4, 4> rotateX(float angle)
     {
