@@ -20,7 +20,7 @@ void Renderer::DrawMesh(Mesh& mesh, const Mat4& transform, SDL_Renderer* sdl_ren
     {
         // projects matrix so that we can scale the window
         float aspect = static_cast<float>(width) / static_cast<float>(height);
-        Mat4 projection{ Mat4::perspective(90.0f, aspect, 1.0f, 100.0f) };
+        Mat4 projection{ Mat4::projection(90.0f, aspect, 1.0f, 100.0f) };
 
         Vec4 clip{ projection * transform * vertex };
         

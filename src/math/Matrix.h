@@ -44,9 +44,12 @@ public:
         return Matrix(identityMatrix);
     }
 
-    static Matrix<4, 4> scale(float scalar) 
+    static Matrix<4, 4> scale(float x, float y, float z) 
     {
-        Matrix<4, 4> result{ identity() * scalar };
+        Matrix<4, 4> result{ identity() };
+        result(0, 0) = x;
+        result(1, 1) = y;
+        result(2, 2) = z;
         result(3, 3) = 1;
         return result;
     }
@@ -95,7 +98,7 @@ public:
         return projectionMatrix;
     }
 
-    static Matrix<4, 4> perspective(float fovDegrees, float aspect, float n, float f)
+    static Matrix<4, 4> projection(float fovDegrees, float aspect, float n, float f)
     {
         float halfH = n * std::tan(fovDegrees * std::acos(-1) / 180.0f * 0.5f);
         float halfW = halfH * aspect;

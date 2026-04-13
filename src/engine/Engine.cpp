@@ -13,7 +13,7 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
 
     // load cube mesh
-    m_obj = OBJLoader::Load("cube.obj");
+    m_obj = OBJLoader::Load("bishop.obj");
 
     running = true;
     m_rotation = Mat4::identity();
@@ -56,7 +56,7 @@ void SDLApplication::Render()
     // render cube wireframe
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 
-    Mat4 scale{ Mat4::scale(1) };
+    Mat4 scale{ Mat4::scale(2) };
     Mat4 translation{ Mat4::translate(0, 0, -5.0f) };
     Mat4 transform = translation * m_rotation * scale;
 
