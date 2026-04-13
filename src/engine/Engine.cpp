@@ -11,11 +11,15 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     m_window = SDL_CreateWindow(windowName, width, height, flags);
     m_renderer = SDL_CreateRenderer(m_window, nullptr);
     if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
-#
+
+    // loads objects into view vector and offsets them on screen
+    m_sceneObjects.push_back(OBJLoader::Load("bishop.obj"));
     m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
     m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
-    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -5.0f});
-    m_sceneObjects[1].getLocalTransform().translateObject({4.0f, 0.0f, -10.0f});
+    
+    m_sceneObjects[0].getLocalTransform().translateObject({-4.0f, 0.0f, -4.0f});
+    m_sceneObjects[1].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
+    m_sceneObjects[2].getLocalTransform().translateObject({4.0f, 0.0f, -4.0f});
 
     running = true;
 }
