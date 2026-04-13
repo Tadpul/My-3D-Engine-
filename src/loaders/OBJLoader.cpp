@@ -1,8 +1,5 @@
 #include <fstream>
 #include <filesystem>
-#include <iostream>
-#include <vector>
-#include <cassert>
 #include <sstream>
 #include "../math/Vector.h"
 #include "OBJLoader.h"

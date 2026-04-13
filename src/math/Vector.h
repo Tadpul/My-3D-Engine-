@@ -30,6 +30,24 @@ public:
         return result;
     }
 
+    static Vector<Dimensions> crossProduct(const Vector<Dimensions>& v1, const Vector<Dimensions>& v2) requires (Dimensions == 3 || Dimensions == 4)
+    {
+        Vector<Dimensions> result{};
+        result.x() = v1.y() * v2.z() - v1.z() * v2.y();
+        result.y() = v1.z() * v2.x() - v1.x() * v2.z();
+        result.z() = v1.x() * v2.y() - v1.y() * v2.x();
+
+        return result;
+    }
+
+    static Vector<3> crossProduct(const Vector<2>& v1, const Vector<2>& v2)
+    {
+        Vector<3> result{};
+        result.z() = v1.x() * v2.y() - v1.y() * v2.x();
+
+        return result;
+    }
+
     // simple return functions
     float getMagnitude() const 
     {
@@ -76,7 +94,7 @@ public:
         return result;
     }
 
-    friend Vector<Dimensions> operator-(const Vector<Dimensions>& vectorA, const Vector<Dimensions>& vectorB)
+    friend Vector<Dimensions> operator-(const Vector<Dimensions>& vectorA, const Vector<Dimensions>& vectorB) 
     {
         Vector<Dimensions> result{};
         for (size_t i{ 0 }; i < Dimensions; i++) { result(i) = vectorA.m_vector[i] - vectorB.m_vector[i]; }

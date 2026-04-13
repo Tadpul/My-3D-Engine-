@@ -1,10 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <cmath>
-#include <cassert>
-#include <array>
-#include <initializer_list>
 #include "Vector.h"
 
 template <size_t Rows, size_t Columns>
@@ -98,6 +93,13 @@ public:
         projectionMatrix(3, 2) = -1;
 
         return projectionMatrix;
+    }
+
+    static Matrix<4, 4> perspective(float fovDegrees, float aspect, float n, float f)
+    {
+        float halfH = n * std::tan(fovDegrees * std::acos(-1) / 180.0f * 0.5f);
+        float halfW = halfH * aspect;
+        return projection(-halfW, halfW, -halfH, halfH, n, f);
     }
 
     static Matrix<4, 4> translate(float x, float y, float z)
