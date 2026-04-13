@@ -39,7 +39,7 @@ void Transform::rotateObject(std::array<float, 3>& rotation)
 void Transform::translateObject(std::array<float, 3>& translation)
 {
     m_transformState[2] = translation;
-    m_translation = Mat4::scale(translation[0], translation[1], translation[2]);
+    m_translation = Mat4::translate(translation[0], translation[1], translation[2]);
 
     rebuildTranform();
 }
