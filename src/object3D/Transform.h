@@ -16,10 +16,10 @@ public:
     Transform();
     Transform(std::array<float, 3>& scale, std::array<float, 3>& rotation, std::array<float, 3>& translation);
 
-    void scaleObject(std::array<float, 3>& scale);
-    void rotateObject(std::array<float, 3>& rotation);
-    void translateObject(std::array<float, 3>& translation);
-    void Transform::rebuildTranform();
+    void scaleObject(const std::array<float, 3>& scale);
+    void rotateObject(const std::array<float, 3>& rotation);
+    void translateObject(const std::array<float, 3>& translation);
+    void rebuildTranform();
 
     Mat4 getTransformMatrix() const;
     std::array<std::array<float, 3>, 3> getTransform() const;

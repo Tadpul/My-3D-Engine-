@@ -11,12 +11,13 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     m_window = SDL_CreateWindow(windowName, width, height, flags);
     m_renderer = SDL_CreateRenderer(m_window, nullptr);
     if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
-
-    // load cube mesh
-    m_obj = OBJLoader::Load("bishop.obj");
+#
+    m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
+    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
+    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -5.0f});
+    m_sceneObjects[1].getLocalTransform().translateObject({4.0f, 0.0f, -10.0f});
 
     running = true;
-    m_rotation = Mat4::identity();
 }
 
 SDLApplication::~SDLApplication()
@@ -35,12 +36,23 @@ void SDLApplication::Input()
             float dx = event.motion.xrel * (std::acos(-1) / 180.0f);
             float dy = event.motion.yrel * (std::acos(-1) / 180.0f);
 
-            m_rotation = Mat4::rotateX(dy) * Mat4::rotateY(dx) * m_rotation;
+            float angleX = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][0] + dy;
+            float angleY = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][1] + dx;
+            m_sceneObjects[m_selectedObject].getLocalTransform().rotateObject({angleX, angleY, 0});
         }
         else if (event.type == SDL_EVENT_WINDOW_RESIZED)
         {
             m_width = event.window.data1;
             m_height = event.window.data2;
+        }
+        else if (event.type == SDL_EVENT_KEY_DOWN)
+        {
+            size_t index = event.key.key - SDLK_1; 
+            if (index < m_sceneObjects.size())
+            {
+                m_selectedObject = index;
+                std::cout << "Selected object: " << m_selectedObject << '\n';
+            }
         }
     }
 }
@@ -56,12 +68,8 @@ void SDLApplication::Render()
     // render cube wireframe
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 
-    Mat4 scale{ Mat4::scale(2) };
-    Mat4 translation{ Mat4::translate(0, 0, -5.0f) };
-    Mat4 transform = translation * m_rotation * scale;
+    for (Object3D& object : m_sceneObjects) { Renderer::DrawObject(object, m_renderer, m_width, m_height, true); }
 
-    Renderer::DrawMesh(m_obj, transform, m_renderer, m_width, m_height, true);
-    
     // more drawing operations
     SDL_RenderPresent(m_renderer);
 }

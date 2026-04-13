@@ -2,7 +2,14 @@
 #include <array>
 #include <initializer_list>
 
-Transform::Transform() : m_transform(Mat4::identity()) {}
+Transform::Transform() 
+{
+    m_scale = Mat4::identity();
+    m_rotation = Mat4::identity();
+    m_translation = Mat4::identity();
+    m_transform = Mat4::identity();
+
+}
 Transform::Transform(std::array<float, 3>& scale, std::array<float, 3>& rotation, std::array<float, 3>& translation)
 {
     m_transformState[0] = scale;
@@ -18,7 +25,7 @@ Transform::Transform(std::array<float, 3>& scale, std::array<float, 3>& rotation
     rebuildTranform();
 }
 
-void Transform::scaleObject(std::array<float, 3>& scale)
+void Transform::scaleObject(const std::array<float, 3>& scale)
 {
     m_transformState[0] = scale;
     m_scale = Mat4::scale(scale[0], scale[1], scale[2]);
@@ -26,7 +33,7 @@ void Transform::scaleObject(std::array<float, 3>& scale)
     rebuildTranform();
 }
 
-void Transform::rotateObject(std::array<float, 3>& rotation)
+void Transform::rotateObject(const std::array<float, 3>& rotation)
 {
     m_transformState[1] = rotation;
     m_rotation = Mat4::rotateX(rotation[0]) *
@@ -36,7 +43,7 @@ void Transform::rotateObject(std::array<float, 3>& rotation)
     rebuildTranform();
 }
 
-void Transform::translateObject(std::array<float, 3>& translation)
+void Transform::translateObject(const std::array<float, 3>& translation)
 {
     m_transformState[2] = translation;
     m_translation = Mat4::translate(translation[0], translation[1], translation[2]);

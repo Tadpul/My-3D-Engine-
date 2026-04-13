@@ -12,5 +12,10 @@ private:
 
 public:
     Object3D();
+    Object3D(const Mesh& mesh);
     Object3D(const Transform& localTransform, const Transform& worldTransform, const Mesh& mesh);
+
+    Transform& getLocalTransform();
+    Transform& getWorldTransform();
+    const Mesh& getMesh() const;
 };
