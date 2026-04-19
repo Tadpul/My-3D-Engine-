@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../graphics/Mesh.h"
+#include "../object3D/Mesh.h"
 #include <string>
 
 class OBJLoader

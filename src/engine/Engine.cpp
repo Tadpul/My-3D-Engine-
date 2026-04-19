@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include <string>
+#include <cstdint>
 #include <algorithm>
 
 SDLApplication::SDLApplication(const char* windowName, const int width, const int height, const int flags=0) 
@@ -12,20 +13,29 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     m_renderer = SDL_CreateRenderer(m_window, nullptr);
     if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
 
-    // loads objects into view vector and offsets them on screen
-    m_sceneObjects.push_back(OBJLoader::Load("bishop.obj"));
-    m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
-    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
+    // initialise the frame buffer and corresponding texture
+    m_scale = 2;
+    m_fb.width = m_width / m_scale;
+    m_fb.height = m_height / m_scale;
+    m_fb.pitch = m_fb.width * sizeof(uint32_t);
+
+    m_fb.pixels.resize(m_fb.width * m_fb.height);
     
-    m_sceneObjects[0].getLocalTransform().translateObject({-4.0f, 0.0f, -4.0f});
-    m_sceneObjects[1].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
-    m_sceneObjects[2].getLocalTransform().translateObject({4.0f, 0.0f, -4.0f});
+    m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
+    SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
+
+    // loads objects into view vector and offsets them on screen
+    m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
+    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
 
     running = true;
 }
 
 SDLApplication::~SDLApplication()
 {
+    SDL_DestroyTexture(m_texture);
+    SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyWindow(m_window);
     SDL_Quit();
 }
 
@@ -48,6 +58,15 @@ void SDLApplication::Input()
         {
             m_width = event.window.data1;
             m_height = event.window.data2;
+
+            m_fb.width = m_width / m_scale;
+            m_fb.height = m_height / m_scale;
+            m_fb.pitch = m_fb.width * sizeof(uint32_t);
+            m_fb.pixels.assign(m_fb.width * m_fb.height, 0x00000000);
+
+            SDL_DestroyTexture(m_texture);
+            m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
+            SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
         }
         else if (event.type == SDL_EVENT_KEY_DOWN)
         {
@@ -58,6 +77,20 @@ void SDLApplication::Input()
                 std::cout << "Selected object: " << m_selectedObject << '\n';
             }
         }
+        else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+        {
+            for (int y = 0; y < m_fb.height; y++)
+            {
+                for (int x = 0; x < m_fb.width; x++)
+                {
+                    if (m_fb.pixels[y * m_fb.width + x] == 0)
+                        std::cout << ". ";
+                    else
+                        std::cout << "# ";
+                }
+                std::cout << '\n';
+            }
+        }
     }
 }
 
@@ -65,14 +98,16 @@ void SDLApplication::Update() {}
 
 void SDLApplication::Render() 
 {
-    // set background colour
-    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
     SDL_RenderClear(m_renderer);
 
-    // render cube wireframe
-    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+    std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
 
-    for (Object3D& object : m_sceneObjects) { Renderer::DrawObject(object, m_renderer, m_width, m_height, true); }
+    for (Object3D& object : m_sceneObjects) { drawObjectWireframe(object, m_renderer, m_fb, false); }
+    SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
+
+    // clear renderer with a background colour and then render the texture 
+    SDL_RenderTexture(m_renderer, m_texture, nullptr, nullptr);
 
     // more drawing operations
     SDL_RenderPresent(m_renderer);
@@ -83,7 +118,7 @@ void SDLApplication::MainLoop()
     int fps{};
     Uint64 lastTime{};
 
-    constexpr int targetFps{ 120 };
+    constexpr int targetFps{ 12000 };
     Uint64 frameDelay{ static_cast<Uint64>(1000 / targetFps) };
 
     while (running)

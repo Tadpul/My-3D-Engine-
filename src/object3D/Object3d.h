@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Transform.h"
-#include "../graphics/Mesh.h"
+#include "Mesh.h"
 
 class Object3D
 {

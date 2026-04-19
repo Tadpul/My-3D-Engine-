@@ -10,9 +10,12 @@ class SDLApplication
 private:
     SDL_Window* m_window{};
     SDL_Renderer* m_renderer{};
+    SDL_Texture* m_texture{};
+    Framebuffer m_fb{};
 
     bool running{};
     int m_width{}, m_height{};
+    int m_scale{1};
 
     std::vector<Object3D> m_sceneObjects{};
     size_t m_selectedObject{};

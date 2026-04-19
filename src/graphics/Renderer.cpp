@@ -1,7 +1,8 @@
 #include "../math/Vector.h"
 #include "Renderer.h"
+#include "line/ClipLine.h"
 
-void Renderer::meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int width, int height)
+void meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int width, int height)
 {
     // projects matrix so that we can scale the window
     float aspect = static_cast<float>(width) / static_cast<float>(height);
@@ -15,11 +16,12 @@ void Renderer::meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int w
         Vec4 clip{ fullTransform * vertex };
         
         if (std::abs(clip.w()) > 1e-6f) { clip = clip * (1 / clip.w()); }
+        else std::cout << "w is 0";
         ndcVertices.push_back(clip);
     }
 }
 
-Vec2 Renderer::NDCToScreen(const Vec4& ndc, int width, int height)
+Vec2 NDCToScreen(const Vec4& ndc, int width, int height)
 {
     Vec2 result{};
     result.x() = (ndc.x() + 1) * 0.5f * width;
@@ -28,25 +30,17 @@ Vec2 Renderer::NDCToScreen(const Vec4& ndc, int width, int height)
     return result;
 }
 
-void Renderer::drawFaces(SDL_Renderer* sdl_renderer, const Face& face, const std::vector<Vec2>& sdlVertices)
-{
-    SDL_RenderLine(sdl_renderer, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v1].x(), sdlVertices[face.v1].y());
-    SDL_RenderLine(sdl_renderer, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y());
-    SDL_RenderLine(sdl_renderer, sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y());
-
-}
-
-void Renderer::DrawObject(Object3D& object, SDL_Renderer* sdl_renderer, int width, int height, bool backFaceCulling=true)
+void drawObjectWireframe(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, bool backFaceCulling=true)
 {
     std::vector<Vec4> ndcVertices{}; 
     std::vector<Vec2> sdlVertices{};
     ndcVertices.reserve(object.getMesh().vertices.size());
     sdlVertices.reserve(object.getMesh().vertices.size());
     
-    meshToNDC(object, ndcVertices, width, height);
+    meshToNDC(object, ndcVertices, fb.width, fb.height);
 
     // turns ndc vertices to sdl verices
-    for (const Vec4& ndcVertex : ndcVertices) { sdlVertices.push_back(NDCToScreen(ndcVertex, width, height)); }
+    for (const Vec4& ndcVertex : ndcVertices) { sdlVertices.push_back(NDCToScreen(ndcVertex, fb.width, fb.height)); }
 
     // for each face draw, and apply backFaceCulling if selected
     for (const Face& face : object.getMesh().faces)
@@ -58,6 +52,8 @@ void Renderer::DrawObject(Object3D& object, SDL_Renderer* sdl_renderer, int widt
             if (Vec4::crossProduct(Vec1, Vec2).z() < -1e-6f) continue;
         }
 
-        drawFaces(sdl_renderer, face, sdlVertices);
+        drawClippedLine(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), 0xFFFFFFFF);
+        drawClippedLine(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), 0xFFFFFFFF);
+        drawClippedLine(fb, sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), 0xFFFFFFFF);
     }
 }
