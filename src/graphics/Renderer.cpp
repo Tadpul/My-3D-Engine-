@@ -30,8 +30,9 @@ Vec2 NDCToScreen(const Vec4& ndc, int width, int height)
     return result;
 }
 
-void drawObjectWireframe(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, bool backFaceCulling=true)
+void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, const std::string& type, bool backFaceCulling) 
 {
+    assert((type == "wireframe" || type == "object") && "Error: object type must be valid");
     std::vector<Vec4> ndcVertices{}; 
     std::vector<Vec2> sdlVertices{};
     ndcVertices.reserve(object.getMesh().vertices.size());
@@ -52,8 +53,12 @@ void drawObjectWireframe(Object3D& object, SDL_Renderer* sdl_renderer, Framebuff
             if (Vec4::crossProduct(Vec1, Vec2).z() < -1e-6f) continue;
         }
 
-        drawClippedLine(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), 0xFFFFFFFF);
-        drawClippedLine(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), 0xFFFFFFFF);
-        drawClippedLine(fb, sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), 0xFFFFFFFF);
+        if (type == "wireframe")
+        {
+            drawClippedLine(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), 0xFFFFFFFF);
+            drawClippedLine(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), 0xFFFFFFFF);
+            drawClippedLine(fb, sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), 0xFFFFFFFF);
+        }
+        else if (type == "object");
     }
 }

@@ -14,18 +14,11 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     if (!m_renderer) std::cout << "Error: " << SDL_GetError() << std::endl;
 
     // initialise the frame buffer and corresponding texture
-    m_scale = 2;
-    m_fb.width = m_width / m_scale;
-    m_fb.height = m_height / m_scale;
-    m_fb.pitch = m_fb.width * sizeof(uint32_t);
-
-    m_fb.pixels.resize(m_fb.width * m_fb.height);
-    
-    m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
-    SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
+    m_scale = std::clamp(m_scale, 1, std::min(m_width, m_height));
+    updateFramebuffer();
 
     // loads objects into view vector and offsets them on screen
-    m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
+    m_sceneObjects.push_back(OBJLoader::Load("jinxGrenade.obj"));
     m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
 
     running = true;
@@ -59,14 +52,7 @@ void SDLApplication::Input()
             m_width = event.window.data1;
             m_height = event.window.data2;
 
-            m_fb.width = m_width / m_scale;
-            m_fb.height = m_height / m_scale;
-            m_fb.pitch = m_fb.width * sizeof(uint32_t);
-            m_fb.pixels.assign(m_fb.width * m_fb.height, 0x00000000);
-
-            SDL_DestroyTexture(m_texture);
-            m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
-            SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
+            updateFramebuffer();
         }
         else if (event.type == SDL_EVENT_KEY_DOWN)
         {
@@ -76,19 +62,15 @@ void SDLApplication::Input()
                 m_selectedObject = index;
                 std::cout << "Selected object: " << m_selectedObject << '\n';
             }
-        }
-        else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
-        {
-            for (int y = 0; y < m_fb.height; y++)
+            else if (event.key.key == SDLK_EQUALS && (event.key.mod & SDLK_LSHIFT))
             {
-                for (int x = 0; x < m_fb.width; x++)
-                {
-                    if (m_fb.pixels[y * m_fb.width + x] == 0)
-                        std::cout << ". ";
-                    else
-                        std::cout << "# ";
-                }
-                std::cout << '\n';
+                m_scale = std::clamp(m_scale + 1, 1, std::min(m_width, m_height));
+                updateFramebuffer();
+            }
+            else if (event.key.key == SDLK_MINUS || event.key.key == SDLK_KP_MINUS)
+            {
+                m_scale = std::clamp(m_scale - 1, 1, std::min(m_width, m_height));
+                updateFramebuffer();
             }
         }
     }
@@ -103,7 +85,7 @@ void SDLApplication::Render()
 
     std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
 
-    for (Object3D& object : m_sceneObjects) { drawObjectWireframe(object, m_renderer, m_fb, false); }
+    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, "wireframe", true); }
     SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
 
     // clear renderer with a background colour and then render the texture 
@@ -111,6 +93,18 @@ void SDLApplication::Render()
 
     // more drawing operations
     SDL_RenderPresent(m_renderer);
+}
+
+void SDLApplication::updateFramebuffer()
+{
+    m_fb.width = m_width / m_scale;
+    m_fb.height = m_height / m_scale;
+    m_fb.pitch = m_fb.width * sizeof(uint32_t);
+    m_fb.pixels.assign(m_fb.width * m_fb.height, 0x00000000);
+
+    SDL_DestroyTexture(m_texture);
+    m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
+    SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
 }
 
 void SDLApplication::MainLoop()
@@ -146,3 +140,4 @@ void SDLApplication::MainLoop()
         else if (frameDelay > deltaTime) SDL_Delay(currentTime + frameDelay - SDL_GetTicks());
     }
 }
+

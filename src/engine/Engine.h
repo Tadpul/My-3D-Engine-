@@ -27,4 +27,5 @@ public:
     void Update();
     void Render();
     void MainLoop();
+    void updateFramebuffer();
 };
