@@ -19,7 +19,9 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
 
     // loads objects into view vector and offsets them on screen
     m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
-    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
+    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
+    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, -2.0f, -4.0f});
+    m_sceneObjects[1].getLocalTransform().translateObject({2.0f, 0.0f, -4.0f});
 
     running = true;
 }
@@ -85,7 +87,7 @@ void SDLApplication::Render()
 
     std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
 
-    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, "object", true); }
+    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, "wireframe", true); }
     SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
 
     // clear renderer with a background colour and then render the texture 
@@ -102,7 +104,7 @@ void SDLApplication::updateFramebuffer()
     m_fb.pitch = m_fb.width * sizeof(uint32_t);
     m_fb.pixels.assign(m_fb.width * m_fb.height, 0x00000000);
 
-    SDL_DestroyTexture(m_texture);
+    if (m_texture) SDL_DestroyTexture(m_texture);
     m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
     SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
 }
@@ -112,7 +114,7 @@ void SDLApplication::MainLoop()
     int fps{};
     Uint64 lastTime{};
 
-    constexpr int targetFps{ 12000 };
+    constexpr int targetFps{ 120 };
     Uint64 frameDelay{ static_cast<Uint64>(1000 / targetFps) };
 
     while (running)

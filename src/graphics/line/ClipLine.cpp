@@ -27,8 +27,8 @@ bool clipLine(int& x0, int& y0, int& x1, int& y1, int xmin, int ymin, int xmax, 
         int x, y;
         if (oc & LEFT) { x = xmin; y = y0 + (y1-y0) * (xmin-x0) / (x1-x0); } 
         else if (oc & RIGHT) { x = xmax; y = y0 + (y1-y0) * (xmax-x0) / (x1-x0); }
-        else if (oc & BOTTOM) { y = ymax; x = x0 + (x1-x0) * (ymax-y0) / (y1-y0); }
-        else { y = ymin; x = x0 + (x1-x0) * (ymin-y0) / (y1-y0); } // TOP
+        else if (oc & TOP) { y = ymax; x = x0 + (x1-x0) * (ymax-y0) / (y1-y0); }
+        else { y = ymin; x = x0 + (x1-x0) * (ymin-y0) / (y1-y0); } // BOTTOM
 
         if (oc == oc0) { x0 = x, y0 = y; oc0 = outcode(x0, y0, xmin, ymin, xmax, ymax); }
         else { x1 = x, y1 = y; oc1 = outcode(x1, y1, xmin, ymin, xmax, ymax); }

@@ -10,11 +10,11 @@ void drawBottomTriangle(Framebuffer& fb, int x0, int y0, int x1, int y1, int x2,
     float left{ static_cast<float>(x1) };
     float right{ static_cast<float>(x0) };
 
-    for (size_t y{ static_cast<size_t>(y0) }; y <= static_cast<size_t>(y2); y++)
+    for (int y{ static_cast<int>(y0) }; y <= static_cast<int>(y2); y++)
     {
-        for (size_t x{ static_cast<size_t>(left) }; x <= static_cast<size_t>(right); x++) 
+        for (int x{ static_cast<int>(left) }; x <= static_cast<int>(right); x++) 
         {
-            if (static_cast<int>(x) >= 0 && x < static_cast<size_t>(fb.width) && static_cast<int>(y) >= 0 && y < static_cast<size_t>(fb.height))
+            if (static_cast<int>(x) >= 0 && x < static_cast<int>(fb.width) && static_cast<int>(y) >= 0 && y < static_cast<int>(fb.height))
             fb.pixels[y * fb.width + x] = colour;
         }
         left += mInverseLeft;
@@ -32,11 +32,11 @@ void drawTopTriangle(Framebuffer& fb, int x0, int y0, int x1, int y1, int x2, in
     float left{ static_cast<float>(x0) };
     float right{ static_cast<float>(x0) };
 
-    for (size_t y{ static_cast<size_t>(y0) }; y <= static_cast<size_t>(y1); y++)
+    for (int y{ static_cast<int>(y0) }; y <= static_cast<int>(y1); y++)
     {
-        for (size_t x{ static_cast<size_t>(left) }; x <= static_cast<size_t>(right); x++) 
+        for (int x{ static_cast<int>(left) }; x <= static_cast<int>(right); x++) 
         {
-            if (static_cast<int>(x) >= 0 && x < static_cast<size_t>(fb.width) && static_cast<int>(y) >= 0 && y < static_cast<size_t>(fb.height))
+            if (static_cast<int>(x) >= 0 && x < static_cast<int>(fb.width) && static_cast<int>(y) >= 0 && y < static_cast<int>(fb.height))
             fb.pixels[y * fb.width + x] = colour;
         }
         left += mInverseLeft;
