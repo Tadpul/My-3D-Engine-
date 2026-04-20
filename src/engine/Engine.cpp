@@ -18,7 +18,7 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     updateFramebuffer();
 
     // loads objects into view vector and offsets them on screen
-    m_sceneObjects.push_back(OBJLoader::Load("jinxGrenade.obj"));
+    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
     m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
 
     running = true;
@@ -85,7 +85,7 @@ void SDLApplication::Render()
 
     std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
 
-    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, "wireframe", true); }
+    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, "object", true); }
     SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
 
     // clear renderer with a background colour and then render the texture 
