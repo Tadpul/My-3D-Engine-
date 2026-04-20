@@ -62,7 +62,6 @@ void SDLApplication::Input()
             if (index < m_sceneObjects.size())
             {
                 m_selectedObject = index;
-                std::cout << "Selected object: " << m_selectedObject << '\n';
             }
             else if (event.key.key == SDLK_EQUALS && (event.key.mod & SDLK_LSHIFT))
             {
@@ -74,6 +73,8 @@ void SDLApplication::Input()
                 m_scale = std::clamp(m_scale - 1, 1, std::min(m_width, m_height));
                 updateFramebuffer();
             }
+            else if (event.key.key == SDLK_O) m_renderingMode = "object";
+            else if (event.key.key == SDLK_W) m_renderingMode = "wireframe";
         }
     }
 }
@@ -87,7 +88,7 @@ void SDLApplication::Render()
 
     std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
 
-    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, "wireframe", true); }
+    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, m_renderingMode, true); }
     SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
 
     // clear renderer with a background colour and then render the texture 
