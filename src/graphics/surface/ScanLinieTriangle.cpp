@@ -1,4 +1,4 @@
-#include "Triangle.h"
+#include "ScanLineTriangle.h"
 
 void drawBottomTriangle(Framebuffer& fb, int x0, int y0, int x1, int y1, int x2, int y2, uint32_t colour)
 {

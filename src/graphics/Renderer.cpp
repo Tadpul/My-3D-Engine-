@@ -1,7 +1,8 @@
 #include "../math/Vector.h"
 #include "Renderer.h"
 #include "line/ClipLine.h"
-#include "surface/Triangle.h"
+#include "surface/ScanLineTriangle.h"
+#include "surface/BoundingBoxTriangle.h"
 
 void meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int width, int height)
 {
@@ -87,9 +88,11 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
                 uint8_t b{ static_cast<uint8_t>(colour.z()) };
 
                 uint32_t colourARGB8888{ (0xFFu << 24) | (r << 16) | (g << 8) | b };
-                drawScalineTriangle(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), 
-                                        sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), 
-                                        sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), colourARGB8888);
+            //     drawScalineTriangle(fb, sdlVertices[face.v0].x(), sdlVertices[face.v0].y(), 
+            //                             sdlVertices[face.v1].x(), sdlVertices[face.v1].y(), 
+            //                             sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), colourARGB8888);
+
+                boundingBoxFill(fb, sdlVertices[face.v0], sdlVertices[face.v1], sdlVertices[face.v2], colourARGB8888);
             }
         }
     }
