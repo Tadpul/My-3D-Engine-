@@ -18,8 +18,8 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     updateFramebuffer();
 
     // loads objects into view vector and offsets them on screen
-    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
-    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -3.0f});
+    m_sceneObjects.push_back(OBJLoader::Load("cogRobot.obj"));
+    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -8.0f});
 
     running = true;
 }
