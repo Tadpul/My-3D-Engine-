@@ -18,16 +18,16 @@ void meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int width, int 
         Vec4 clip{ fullTransform * vertex };
         
         if (std::abs(clip.w()) > 1e-6f) { clip = clip * (1 / clip.w()); }
-        else std::cout << "w is 0";
         ndcVertices.push_back(clip);
     }
 }
 
-Vec2 NDCToScreen(const Vec4& ndc, int width, int height)
+Vec3 NDCToScreen(const Vec4& ndc, int width, int height)
 {
-    Vec2 result{};
+    Vec3 result{};
     result.x() = (ndc.x() + 1) * 0.5f * width;
     result.y() = (-ndc.y() + 1) * 0.5f * height;
+    result.z() = ndc.z();
 
     return result;
 }
@@ -36,7 +36,7 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
 {
     assert((type == "wireframe" || type == "object") && "Error: object type must be valid");
     std::vector<Vec4> ndcVertices{}; 
-    std::vector<Vec2> sdlVertices{};
+    std::vector<Vec3> sdlVertices{};
     ndcVertices.reserve(object.getMesh().vertices.size());
     sdlVertices.reserve(object.getMesh().vertices.size());
     
@@ -93,7 +93,7 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
             //                             sdlVertices[face.v2].x(), sdlVertices[face.v2].y(), colourARGB8888);
 
                 boundingBoxFill(fb, sdlVertices[face.v0], sdlVertices[face.v1], sdlVertices[face.v2], colourARGB8888);
-            }
+            } 
         }
     }
 }

@@ -18,8 +18,8 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     updateFramebuffer();
 
     // loads objects into view vector and offsets them on screen
-    m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
-    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
+    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
+    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -3.0f});
 
     running = true;
 }
@@ -85,8 +85,9 @@ void SDLApplication::Render()
     SDL_RenderClear(m_renderer);
 
     std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
+    std::fill(m_fb.zBuffer.begin(), m_fb.zBuffer.end(), 1);
 
-    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, m_renderingMode, true); }
+    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, m_renderingMode, false); }
     SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
 
     // clear renderer with a background colour and then render the texture 
@@ -102,6 +103,7 @@ void SDLApplication::updateFramebuffer()
     m_fb.height = m_height / m_scale;
     m_fb.pitch = m_fb.width * sizeof(uint32_t);
     m_fb.pixels.assign(m_fb.width * m_fb.height, 0x00000000);
+    m_fb.zBuffer.assign(m_fb.width * m_fb.height, 1.0f);
 
     if (m_texture) SDL_DestroyTexture(m_texture);
     m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_fb.width, m_fb.height);
@@ -113,7 +115,7 @@ void SDLApplication::MainLoop()
     int fps{};
     Uint64 lastTime{};
 
-    constexpr int targetFps{ 120 };
+    constexpr int targetFps{ 12000 };
     Uint64 frameDelay{ static_cast<Uint64>(1000 / targetFps) };
 
     while (running)

@@ -10,4 +10,5 @@ struct Framebuffer
     int pitch;
 
     std::vector<uint32_t> pixels;
+    std::vector<float> zBuffer;
 };

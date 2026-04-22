@@ -16,6 +16,7 @@ private:
     bool running{};
     int m_width{}, m_height{};
     int m_scale{1};
+
     std::string m_renderingMode{ "object" };
 
     std::vector<Object3D> m_sceneObjects{};
