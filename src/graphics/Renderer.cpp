@@ -91,7 +91,7 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
 
             if (lightIntensity >= 0) 
             {
-                Vec3 colour{ 100, 255, 255 };
+                Vec3 colour{ 240, 255, 255 };
                 colour = colour * lightIntensity;
 
                 // colour conversion rgb into ARGB8888
