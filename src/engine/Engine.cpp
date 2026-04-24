@@ -16,10 +16,18 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     // initialise the frame buffer and corresponding texture
     m_scale = std::clamp(m_scale, 1, std::min(m_width, m_height));
     updateFramebuffer();
+    keystate = SDL_GetKeyboardState(nullptr);
+
+    speed = 0.3;
+    sensitivity = 0.5;
 
     // loads objects into view vector and offsets them on screen
+    m_sceneObjects.push_back(OBJLoader::Load("cube.obj"));
+    m_sceneObjects.push_back(OBJLoader::Load("monkey.obj"));
     m_sceneObjects.push_back(OBJLoader::Load("jinxGrenade.obj"));
     m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
+    m_sceneObjects[1].getLocalTransform().translateObject({0.0f, 0.0f, 4.0f});
+    m_sceneObjects[2].getLocalTransform().translateObject({0.0f, 0.0f, 8.0f});
 
     running = true;
 }
@@ -38,7 +46,13 @@ void SDLApplication::Input()
     while (SDL_PollEvent(&event))
     {
         if (event.type == SDL_EVENT_QUIT) running = false;
-        else if (event.type == SDL_EVENT_MOUSE_MOTION)
+        else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_RIGHT)
+            rotating = true;
+
+        if (event.type == SDL_EVENT_MOUSE_BUTTON_UP && event.button.button == SDL_BUTTON_RIGHT)
+            rotating = false;
+
+        if (event.type == SDL_EVENT_MOUSE_MOTION&& rotating)
         {
             float dx = event.motion.xrel * (std::acos(-1) / 180.0f);
             float dy = event.motion.yrel * (std::acos(-1) / 180.0f);
@@ -47,8 +61,8 @@ void SDLApplication::Input()
             // float angleY = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][1] + dx;
             // m_sceneObjects[m_selectedObject].getLocalTransform().rotateObject({angleX, angleY, 0});
 
-            m_camera.yaw += dx * sensitivity;
-            m_camera.pitch += dy * sensitivity;
+            m_camera.yaw -= dx * sensitivity;
+            m_camera.pitch -= dy * sensitivity;
             m_camera.pitch = std::clamp(m_camera.pitch, -1.5f, 1.5f);
         }
         else if (event.type == SDL_EVENT_WINDOW_RESIZED)
@@ -77,16 +91,30 @@ void SDLApplication::Input()
             }
             else if (event.key.key == SDLK_O) m_renderingMode = "object";
             else if (event.key.key == SDLK_L) m_renderingMode = "wireframe";
-
-            else if (event.key.key == SDLK_W) m_camera.position = m_camera.position + m_camera.forward() * speed;
-            else if (event.key.key == SDLK_S) m_camera.position = m_camera.position - m_camera.forward() * speed;
-            else if (event.key.key == SDLK_D) m_camera.position = m_camera.position + m_camera.right() * speed;
-            else if (event.key.key == SDLK_A) m_camera.position = m_camera.position - m_camera.right() * speed;
         }
     }
 }
 
-void SDLApplication::Update() {}
+void SDLApplication::Update() 
+{
+    SDL_PumpEvents();
+
+    Vec3 forward{ m_camera.forward() };
+    Vec3 right{ m_camera.right() };
+    Vec3 movement{};
+
+    if (keystate[SDL_SCANCODE_W]) movement = movement + forward;
+    if (keystate[SDL_SCANCODE_S]) movement = movement - forward;
+    if (keystate[SDL_SCANCODE_A]) movement = movement - right;
+    if (keystate[SDL_SCANCODE_D]) movement = movement + right;
+
+    // normalise diagonal movement
+    if (movement.getMagnitude() > 0.0f)
+    {
+        movement = movement.getDirection();
+        m_camera.position = m_camera.position + movement * speed;
+    }
+}
 
 void SDLApplication::Render() 
 {
@@ -124,7 +152,7 @@ void SDLApplication::MainLoop()
     int fps{};
     Uint64 lastTime{};
 
-    constexpr int targetFps{ 12000 };
+    constexpr int targetFps{ 60 };
     Uint64 frameDelay{ static_cast<Uint64>(1000 / targetFps) };
 
     while (running)

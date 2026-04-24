@@ -54,7 +54,7 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
         const Vec4& v1 = ndcVertices[face.v1];
         const Vec4& v2 = ndcVertices[face.v2];
 
-        // ✅ ONLY reject if ALL vertices are behind camera
+        // reject if ALL vertices are behind camera
         if (v0.w() <= 0 || v1.w() <= 0 || v2.w() <= 0)
         {
             continue;

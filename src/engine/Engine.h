@@ -14,12 +14,14 @@ private:
     SDL_Texture* m_texture{};
     Framebuffer m_fb{};
     Camera m_camera{};
+    const bool* keystate{};
 
+    bool rotating{ false };
     bool running{};
     int m_width{}, m_height{};
     int m_scale{1};
     float speed{0.1};
-    float sensitivity{1};
+    float sensitivity{0.5};
 
     std::string m_renderingMode{ "object" };
 

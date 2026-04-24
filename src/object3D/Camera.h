@@ -5,13 +5,25 @@
 struct Camera
 {
     Vec3 position{};
-    float yaw{}; // rotation around y axis
-    float pitch{}; // rotation around x axis
+    float yaw{}; // rotation around y axis (left/right)
+    float pitch{}; // rotation around x axis (up/down)
+    float radians{ std::acos(-1) / 180 };
 
-    Vec3 forward()
-    { return Vec3{ std::sin(yaw), 0, -std::cos(yaw) }; };
+    Vec3 forward() const 
+    { 
+        float cy = std::cos(yaw);
+        float sy = std::sin(yaw);
+        float cp = std::cos(pitch);
+        float sp = std::sin(pitch);
 
-    Vec3 right()
-    { return Vec3{ std::cos(yaw), 0, std::sin(yaw) }; };
+        return { -sy, sp, -cy};
+    }
+
+    Vec3 right() const
+    {
+        Vec3 worldUp{ 0.0f, 1.0f, 0.0f };
+
+        // Cross product: forward × up
+        return Vec3::crossProduct(forward(), worldUp);
+    }
 };
-
