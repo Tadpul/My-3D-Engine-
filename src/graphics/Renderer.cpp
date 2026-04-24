@@ -4,12 +4,13 @@
 #include "surface/ScanLineTriangle.h"
 #include "surface/BoundingBoxTriangle.h"
 
-void meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int width, int height)
+void meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, const Camera& camera, int width, int height)
 {
     // projects matrix so that we can scale the window
     float aspect = static_cast<float>(width) / static_cast<float>(height);
     Mat4 projection{ Mat4::projection(90.0f, aspect, 1.0f, 100.0f) };
     Mat4 fullTransform = projection
+                       * getViewMatrix(camera)
                        * object.getWorldTransform().getTransformMatrix()
                        * object.getLocalTransform().getTransformMatrix();
 
@@ -17,7 +18,8 @@ void meshToNDC(Object3D& object, std::vector<Vec4>& ndcVertices, int width, int 
     {
         Vec4 clip{ fullTransform * vertex };
         
-        if (std::abs(clip.w()) > 1e-6f) { clip = clip * (1 / clip.w()); }
+        if ((clip.w()) > 1e-6f) { clip = clip * (1 / clip.w()); }
+        
         ndcVertices.push_back(clip);
     }
 }
@@ -32,7 +34,7 @@ Vec3 NDCToScreen(const Vec4& ndc, int width, int height)
     return result;
 }
 
-void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, const std::string& type, bool backFaceCulling) 
+void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, const Camera& camera, const std::string& type, bool backFaceCulling) 
 {
     assert((type == "wireframe" || type == "object") && "Error: object type must be valid");
     std::vector<Vec4> ndcVertices{}; 
@@ -40,7 +42,7 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
     ndcVertices.reserve(object.getMesh().vertices.size());
     sdlVertices.reserve(object.getMesh().vertices.size());
     
-    meshToNDC(object, ndcVertices, fb.width, fb.height);
+    meshToNDC(object, ndcVertices, camera, fb.width, fb.height);
 
     // turns ndc vertices to sdl verices
     for (const Vec4& ndcVertex : ndcVertices) { sdlVertices.push_back(NDCToScreen(ndcVertex, fb.width, fb.height)); }
@@ -48,6 +50,16 @@ void drawObject(Object3D& object, SDL_Renderer* sdl_renderer, Framebuffer& fb, c
     // for each face draw, and apply backFaceCulling if selected
     for (const Face& face : object.getMesh().faces)
     {
+        const Vec4& v0 = ndcVertices[face.v0];
+        const Vec4& v1 = ndcVertices[face.v1];
+        const Vec4& v2 = ndcVertices[face.v2];
+
+        // ✅ ONLY reject if ALL vertices are behind camera
+        if (v0.w() <= 0 || v1.w() <= 0 || v2.w() <= 0)
+        {
+            continue;
+        }
+
         if (backFaceCulling)
         {
             Vec4 Vec1 = ndcVertices[face.v1] - ndcVertices[face.v0];

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector.h"
+#include "../object3D/Camera.h"
 
 template <size_t Rows, size_t Columns>
 class Matrix
@@ -197,6 +198,18 @@ Vector<Dimensions> operator*(const Matrix<Rows, Columns>& matrix, const Vector<D
     {
         for (size_t column{ 0 }; column < Columns; column++) { result(row) += matrix(row, column) * vector(column); }
     }
+    return result;
+}
+
+inline Matrix<4, 4> getViewMatrix(const Camera& cam) 
+{
+    Matrix<4, 4> result;
+    Matrix<4, 4> rotationY = Matrix<4, 4>::rotateY(-cam.yaw);
+    Matrix<4, 4> rotationX = Matrix<4, 4>::rotateX(-cam.pitch);
+    Matrix<4, 4> translation = Matrix<4, 4>::translate(-cam.position.x(), -cam.position.y(), -cam.position.z());
+
+    result = rotationX * rotationY * translation;
+
     return result;
 }
 

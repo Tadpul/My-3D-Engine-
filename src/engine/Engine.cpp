@@ -18,8 +18,8 @@ SDLApplication::SDLApplication(const char* windowName, const int width, const in
     updateFramebuffer();
 
     // loads objects into view vector and offsets them on screen
-    m_sceneObjects.push_back(OBJLoader::Load("cogRobot.obj"));
-    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -8.0f});
+    m_sceneObjects.push_back(OBJLoader::Load("jinxGrenade.obj"));
+    m_sceneObjects[0].getLocalTransform().translateObject({0.0f, 0.0f, -4.0f});
 
     running = true;
 }
@@ -43,9 +43,13 @@ void SDLApplication::Input()
             float dx = event.motion.xrel * (std::acos(-1) / 180.0f);
             float dy = event.motion.yrel * (std::acos(-1) / 180.0f);
 
-            float angleX = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][0] + dy;
-            float angleY = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][1] + dx;
-            m_sceneObjects[m_selectedObject].getLocalTransform().rotateObject({angleX, angleY, 0});
+            // float angleX = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][0] + dy;
+            // float angleY = m_sceneObjects[m_selectedObject].getLocalTransform().getTransform()[1][1] + dx;
+            // m_sceneObjects[m_selectedObject].getLocalTransform().rotateObject({angleX, angleY, 0});
+
+            m_camera.yaw += dx * sensitivity;
+            m_camera.pitch += dy * sensitivity;
+            m_camera.pitch = std::clamp(m_camera.pitch, -1.5f, 1.5f);
         }
         else if (event.type == SDL_EVENT_WINDOW_RESIZED)
         {
@@ -72,7 +76,12 @@ void SDLApplication::Input()
                 updateFramebuffer();
             }
             else if (event.key.key == SDLK_O) m_renderingMode = "object";
-            else if (event.key.key == SDLK_W) m_renderingMode = "wireframe";
+            else if (event.key.key == SDLK_L) m_renderingMode = "wireframe";
+
+            else if (event.key.key == SDLK_W) m_camera.position = m_camera.position + m_camera.forward() * speed;
+            else if (event.key.key == SDLK_S) m_camera.position = m_camera.position - m_camera.forward() * speed;
+            else if (event.key.key == SDLK_D) m_camera.position = m_camera.position + m_camera.right() * speed;
+            else if (event.key.key == SDLK_A) m_camera.position = m_camera.position - m_camera.right() * speed;
         }
     }
 }
@@ -87,7 +96,7 @@ void SDLApplication::Render()
     std::fill(m_fb.pixels.begin(), m_fb.pixels.end(), 0x00000000);
     std::fill(m_fb.zBuffer.begin(), m_fb.zBuffer.end(), 1);
 
-    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, m_renderingMode, false); }
+    for (Object3D& object : m_sceneObjects) { drawObject(object, m_renderer, m_fb, m_camera, m_renderingMode, true); }
     SDL_UpdateTexture(m_texture, nullptr, m_fb.pixels.data(), m_fb.pitch);
 
     // clear renderer with a background colour and then render the texture 

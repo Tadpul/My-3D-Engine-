@@ -4,6 +4,7 @@
 #include "../math/Matrix.h"
 #include "../graphics/Renderer.h"
 #include "../object3D/Object3d.h"
+#include "../object3D/Camera.h"
 
 class SDLApplication
 {
@@ -12,10 +13,13 @@ private:
     SDL_Renderer* m_renderer{};
     SDL_Texture* m_texture{};
     Framebuffer m_fb{};
+    Camera m_camera{};
 
     bool running{};
     int m_width{}, m_height{};
     int m_scale{1};
+    float speed{0.1};
+    float sensitivity{1};
 
     std::string m_renderingMode{ "object" };
 
